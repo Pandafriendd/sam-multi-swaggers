@@ -1,0 +1,40 @@
+post:
+  tags:
+  - "pet"
+  summary: "Add a new pet to the store"
+  description: ""
+  operationId: "addPet"
+  consumes:
+  - "application/json"
+  produces:
+  - "application/json"
+  parameters:
+  - in: "body"
+    name: "body"
+    description: "Pet object that needs to be added to the store"
+    required: true
+    schema:
+      $ref: "#/definitions/Pet"
+  responses:
+    200:
+      description: "Success"
+    400:
+      description: "Bad Request"
+    401:
+      description: "Unauthorized"
+    500:
+      description: "Internal Server Error"
+  # For AWS Integration
+  x-amazon-apigateway-request-validators:
+    basic:
+      validateRequestParameters: true
+  x-amazon-apigateway-integration:
+    type: "aws"
+    httpMethod: "POST"
+    # Replace AWS_REGION and ACCOUNT_ID in uri
+    uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:457175632986:function:PostPetFunction/invocations"
+    responses:
+      default:
+        statusCode: 200
+    requestTemplates:
+      application/json: "{\r\n  \"method\": \"$context.httpMethod\",\r\n  \"body\" : \"$input.body\",\r\n  \"headers\": {\r\n    #foreach($param in $input.params().header.keySet())\r\n    \"$param\": \"$util.escapeJavaScript($input.params().header.get($param))\" #if($foreach.hasNext),#end\r\n\r\n    #end\r\n  },\r\n  \"queryParams\": {\r\n    #foreach($param in $input.params().querystring.keySet())\r\n    \"$param\": \"$util.escapeJavaScript($input.params().querystring.get($param))\" #if($foreach.hasNext),#end\r\n\r\n    #end\r\n  },\r\n  \"pathParams\": {\r\n    #foreach($param in $input.params().path.keySet())\r\n    \"$param\": \"$util.escapeJavaScript($input.params().path.get($param))\" #if($foreach.hasNext),#end\r\n\r\n    #end\r\n  }  \r\n}"

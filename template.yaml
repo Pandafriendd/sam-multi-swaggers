@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion : "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Pet Store Rest API Service
+
+Resources:
+
+  PetStoreApiGateway: 
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      #DefinitionUri: ./openapi_bundled.yaml
+      #DefinitionBody:
+      #  Fn::Transform:
+      #    Name: AWS::Include
+      #    Parameters:
+      #      Location: swagger.yaml
+      
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          description: "This is a sample Petstore rest API to demonstrate integration between Swagger (a.k.a. OpenAPI) and AWS API Gateway."
+          version: "1.0.0"
+          title: "Pet Store Service"
+          host: "petstore.com"
+          basePath: "/v1"
+          schemes:
+          - "https"
+        paths:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: paths1.yaml
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: paths2.yaml
+        definitions:
+          Fn::Transform:
+            Name: AWS::Include
+            Parameters:
+              Location: definitions.yaml
+              
+  PostPetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: PostPetFunction
+      Runtime: python3.6
+      Handler: function.handler
+      CodeUri: ./lambda/postPet/
+      Events:
+        PostPetApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref "PetStoreApiGateway"
+            Path: /pet
+            Method: POST
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        
+  GetPetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetPetFunction
+      Runtime: python3.6
+      Handler: function.handler
+      CodeUri: ./lambda/getPet/
+      Events:
+        GetPetApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref "PetStoreApiGateway"
+            Path: /pet/{petId}
+            Method: GET
+      Policies:
+        - AWSLambdaBasicExecutionRole

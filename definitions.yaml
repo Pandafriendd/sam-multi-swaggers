@@ -1,0 +1,22 @@
+Pet:
+  type: "object"
+  properties:
+    id:
+      type: "integer"
+      format: "int64"
+    name:
+      type: "string"
+    type:
+      type: "string"  
+    sub-type:
+      type: "string"
+    photoUrl:
+      type: "string"
+    status:
+      type: "string"
+      description: "Pet status in the store"
+      enum:
+      - "available"
+      - "pending"
+      - "sold"
+  
